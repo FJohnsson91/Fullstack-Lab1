@@ -4,7 +4,7 @@ const addInfo = document.getElementById('addInfo')
 displayAlbums()
 
 async function displayAlbums() {
-  let fetchedDb = [{}]
+  let fetchedFromDb = [{}]
 
   try {
     let response = await fetch('api/albums', {
@@ -12,13 +12,13 @@ async function displayAlbums() {
       headers: { 'content-type': 'application/json' }
     })
 
-    fetchedDb = await response.json()
+    fetchedFromDb = await response.json()
 
   } catch (error) {
     console.log(error)
   }
 
-  let htmlArray = fetchedDb.map(album => {
+  let htmlArray = fetchedFromDb.map(album => {
     return /*html*/`
      <div class="album">
               <p><span><b>Album: </b></span>${album.album}</p>
@@ -54,7 +54,7 @@ addInfo.addEventListener('click', async () => {
   const year = yearMade.value.trim()
 
   if (!album || !artist || !year || isNaN(year)) {
-    alert('Please fill in all the fields. Title and artist as text, year as number.')
+    console.log('Please enter info in all boxes.')
     return
   }
 
@@ -76,3 +76,53 @@ addInfo.addEventListener('click', async () => {
     console.error(error)
   }
 })
+
+function addUpdateFields(id, album, artist, year) {
+
+  let updateID = id
+
+  updateInfo.innerHTML = /*html*/`
+  <label>Album</label>
+  <input type="text" id="albumUpdate">
+  <label>Artist</label>
+  <input type="text" id="artistUpdate">
+  <label>Year</label>
+  <input type="text" id="yearUpdate">
+  <button class="update-button" type="button" id="update-button">Update album</button>`
+
+  document.getElementById("albumUpdate").value = album
+  document.getElementById("artistUpdate").value = artist
+  document.getElementById("yearUpdate").value = year
+
+  updateData = document.getElementById("update-button")
+
+  updateData.addEventListener('click', async () => {
+
+    let album = albumUpdate.value
+    let artist = artistUpdate.value
+    let year = yearUpdate.value
+
+    let info = { album, artist, year }
+
+    if (!album || !artist || !year || isNaN(year))
+      console.log('Please enter info in all boxes.')
+    else {
+
+      try {
+        const result = await fetch('api/albums/' + updateID, {
+          method: 'PUT',
+          body: JSON.stringify(info),
+          headers: { 'content-type': 'application/json' }
+        })
+
+        const response = await result.json()
+        displayAlbums()
+        updateInfo.innerHTML = ''
+        console.log(response)
+
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  })
+}
